@@ -1,5 +1,5 @@
 const functions = require("firebase-functions");
-const moment = require('moment');
+const moment = require("moment");
 
 const admin = require("firebase-admin");
 
@@ -54,8 +54,8 @@ app.post("/api/v1/create/user", async (req, res) => {
   const profileImageLink = "Waiting";
   const password = body.password;
 
-  var userUID
-  console.log('Creating user...')
+  var userUID;
+  console.log("Creating user...");
   await admin
     .auth()
     .createUser({
@@ -75,14 +75,14 @@ app.post("/api/v1/create/user", async (req, res) => {
       ],
     })
     .then(async (userRecord) => {
-      console.log('Line 77')
-      console.log(userRecord)
+      console.log("Line 77");
+      console.log(userRecord);
       userUID = userRecord.uid;
       let resData = {
-        status: 'Success',
-        data: userRecord.uid
-      }
-      console.log(resData)
+        status: "Success",
+        data: userRecord.uid,
+      };
+      console.log(resData);
 
       let batchAssignedToData = [];
       // console.log(req.body.batchAssignedTo);
@@ -93,12 +93,12 @@ app.post("/api/v1/create/user", async (req, res) => {
           let jsonStruc = {
             batchID: req.body.batchAssignedTo[i].batchID,
           };
-    
+
           batchAssignedToData.push(jsonStruc);
         }
       }
-    
-      console.log('User ID: ' + userUID)
+
+      console.log("User ID: " + userUID);
       await userCollection.doc(String(userUID)).set({
         firstName: String(firstName),
         lastName: String(lastName),
@@ -114,10 +114,9 @@ app.post("/api/v1/create/user", async (req, res) => {
       return res.status(200).send(resData);
     })
     .catch((error) => {
-      console.log('Error...')
+      console.log("Error...");
       return res.status(400).send("Failed to create user: " + error);
     });
-
 });
 
 // CREATE Challenger -- POST METHOD -----------------------------------------------------------
@@ -133,7 +132,7 @@ app.post("/api/v1/create/challenger", async (req, res) => {
       sex: req.body.sex,
 
       currentQuizNum: req.body.currentQuizNum,
-      currentInProgressQuiz:  req.body.currentInProgressQuiz,
+      currentInProgressQuiz: req.body.currentInProgressQuiz,
 
       emailAddress: req.body.emailAddress,
       height: req.body.height,
@@ -157,7 +156,7 @@ app.post("/api/v1/create/challenger", async (req, res) => {
       firstWeighIn: req.body.firstWeighIn,
       firstWeighInImageProofLink: req.body.firstWeighInImageProofLink,
       secondWeighIn: req.body.secondWeighIn,
-      secondWeighInImageProofLink: req.body.secondWeighIn,
+      secondWeighInImageProofLink: req.body.secondWeighInImageProofLink,
 
       firstQuizScore: req.body.firstQuizScore,
       secondQuizScore: req.body.secondQuizScore,
@@ -211,7 +210,7 @@ app.post("/api/v1/create/batch", async (req, res) => {
       batchAssignedQuiz: req.body.batchAssignedQuiz,
       batchAssignedQuizB: req.body.batchAssignedQuizB,
       batchTotalChallengers: req.body.batchTotalChallengers,
-      
+
       batchChallengers: [],
     });
 
@@ -286,7 +285,7 @@ app.post("/api/v1/create/category", async (req, res) => {
     await categoryCollection.doc(`/${req.body.categoryID}/`).set({
       categoryID: req.body.categoryID,
       categoryName: req.body.categoryName,
-      categoryLink: req.body.categoryLink
+      categoryLink: req.body.categoryLink,
     });
 
     return res.status(200).send({
@@ -321,7 +320,7 @@ app.get("/api/v1/categories", async (req, res) => {
         const selectedItem = {
           categoryID: doc.data().categoryID,
           categoryName: doc.data().categoryName,
-          categoryLink: doc.data().categoryLink
+          categoryLink: doc.data().categoryLink,
         };
 
         response.push(selectedItem);
@@ -511,7 +510,7 @@ app.get("/api/v1/batch/challengers/:batchID", async (req, res) => {
           lastName: doc.data().lastName,
 
           currentQuizNum: doc.data().currentQuizNum,
-          currentInProgressQuiz:  doc.data().currentInProgressQuiz,
+          currentInProgressQuiz: doc.data().currentInProgressQuiz,
 
           emailAddress: doc.data().emailAddress,
           age: doc.data().age,
@@ -678,17 +677,16 @@ app.get("/api/v1/batches/byCategory/:categoryID", async (req, res) => {
           batchChallengers: doc.data().batchChallengers,
         };
 
-        let categoryID = req.params.categoryID
-        if(categoryID.includes(selectedItem.batchChallengeType)) {
+        let categoryID = req.params.categoryID;
+        if (categoryID.includes(selectedItem.batchChallengeType)) {
           response.push(selectedItem);
         }
-
       });
       return response;
     });
-    console.log('Batch by Categories length: ' + response.length)
-    if(response.length < 1) {
-      response = 'No data found.'
+    console.log("Batch by Categories length: " + response.length);
+    if (response.length < 1) {
+      response = "No data found.";
     }
 
     return res.status(200).send({
@@ -703,7 +701,6 @@ app.get("/api/v1/batches/byCategory/:categoryID", async (req, res) => {
     });
   }
 });
-
 
 // ---------------------------- GET BY ID ----------------------
 
@@ -782,18 +779,18 @@ app.get("/api/v1/challenger/:userCode", async (req, res) => {
 
     let challengerData = await reqDoc.get();
     let response = challengerData.data();
-    let stateValue = true
+    let stateValue = true;
 
-    console.log(response)
-    if(response === null || response === undefined) {
-      response = 'Cannot find challenger.'
-      stateValue = false
+    console.log(response);
+    if (response === null || response === undefined) {
+      response = "Cannot find challenger.";
+      stateValue = false;
     }
 
     return res.status(200).send({
       status: "Success",
       data: response,
-      state: stateValue
+      state: stateValue,
     });
   } catch (err) {
     console.log(err);
@@ -860,7 +857,7 @@ app.get("/api/v1/videosBatch/:id", async (req, res) => {
 
 // Get Wellness Video for current day BY Batch ID
 app.get("/api/v1/wellnessVideo/getVideo/:batchID", async (req, res) => {
-// Get Wellness Video for current day BY Batch ID
+  // Get Wellness Video for current day BY Batch ID
   try {
     const reqDoc = db.collection("videosBatch").doc(req.params.id);
 
@@ -1092,413 +1089,418 @@ app.delete("/api/v1/delete/quiz/:id", async (req, res) => {
 // Get Wellness Video for current day BY Batch ID
 app.get("/api/v1/uchat/getCurrentWellnessVideo/:userID", async (req, res) => {
   // Get Wellness Video for current day BY Batch ID
-    try {
-      const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-      // GET BATCH DATA BY USER ID
-      let challengerData = await reqDoc.get();
-      let challengerRes = challengerData.data();
-      let stateValue = true
-      let videoLink = ''
-      // console.log(challengerRes)
-      if(challengerRes === null || challengerRes === undefined) {
-        console.log('Canoto find challenger...')
-        response = 'Cannot find challenger.'
-        stateValue = false
+  try {
+    const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
+    // GET BATCH DATA BY USER ID
+    let challengerData = await reqDoc.get();
+    let challengerRes = challengerData.data();
+    let stateValue = true;
+    let videoLink = "";
+    // console.log(challengerRes)
+    if (challengerRes === null || challengerRes === undefined) {
+      console.log("Canoto find challenger...");
+      response = "Cannot find challenger.";
+      stateValue = false;
 
-        return res.status(200).send({
-          status: "Success",
-          data: 'Unassigned',
-        });
-
-      } else {
-        console.log("CHALLENGER BATCH ID: ")
-        console.log(challengerRes.groupId)
-        let batcHID = challengerRes.groupId
-        
-        const reqDoc = db.collection("batches").doc(batcHID);
-
-        let batchData = await reqDoc.get();
-        let batchDataRes = batchData.data();
-    
-        if (batchDataRes == null || batchDataRes == undefined) {
-          batchDataRes = "No batch found!";
-        } else {
-          // GET WELLNESS VIDEO DATA BY WELLNESS ID
-          console.log('WELLNESS VIDEO ID: ')
-          console.log(batchDataRes.batchAssignedBatchVid)
-          let wellnessVideoID = batchDataRes.batchAssignedBatchVid
-          let startDateData = batchDataRes.batchStartDate
-
-
-          if(wellnessVideoID != 'Waiting') {
-            const reqDoc = db.collection("videosBatch").doc(wellnessVideoID);
-
-            let batchData = await reqDoc.get();
-            let videosBatchRes = batchData.data();
-            // console.log(videosBatchRes)
-            let videoDaysArr = videosBatchRes.batchVideosData
-            if (videosBatchRes == null || videosBatchRes == undefined) {
-              videosBatchRes = "No batch found!";
-            } else {
-              
-              console.log('BATCH START DATE: ' + startDateData)
-              var startDate = new Date(startDateData);
-            
-              var daysDiff = moment().diff(startDate, "days");
-              daysDiff = parseInt(daysDiff) + 2
-              console.log('Wellness Video DIFF DATEL: ' + daysDiff)
-
-              // console.log('BATCH START DATE: ' + startDateData)
-              // var startDate = new Date(startDateData);
-            
-              // var daysDiff = moment().diff(startDate, "days");
-              // console.log('CAL DIFF DATE: ' + daysDiff)
-              // daysDiff = (parseInt(daysDiff) + 2)
-              // console.log('DIFF DATEL: ' + daysDiff)
-
-              let notWellnessVidDays = [1,5,10,7,15]
-              // let daysAvail = [2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14]
-              // let currentDay = daysAvail[daysDiff]
-              // console.log('CURRENT DAY: ' + currentDay)
-
-              if(notWellnessVidDays.includes(daysDiff)) {
-                console.log('NOT WELLNESS VIDEO DAY!')
-                videoLink = 'Invalid Date'
-
-                return res.status(200).send({
-                  status: "Success",
-                  data: videoLink,
-                });
-              } else {
-                console.log('WELLNESS VIDEO DAY!')
-                videoDaysArr.map(vidDay => {
-                  if(vidDay.day === daysDiff) {
-                    console.log('FOUND VIDEO LINK..')
-                    videoLink = vidDay.videoLink
-
-                    return res.status(200).send({
-                      status: "Success",
-                      data: videoLink,
-                    });
-                  }
-                })
-              }
-
-            }
-          }
-
-        }
-      }
-  
       return res.status(200).send({
         status: "Success",
-        data: videoLink,
+        data: "Unassigned",
       });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
-      });
-    }
-  });
+    } else {
+      console.log("CHALLENGER BATCH ID: ");
+      console.log(challengerRes.groupId);
+      let batcHID = challengerRes.groupId;
 
+      const reqDoc = db.collection("batches").doc(batcHID);
+
+      let batchData = await reqDoc.get();
+      let batchDataRes = batchData.data();
+
+      if (batchDataRes == null || batchDataRes == undefined) {
+        batchDataRes = "No batch found!";
+      } else {
+        // GET WELLNESS VIDEO DATA BY WELLNESS ID
+        console.log("WELLNESS VIDEO ID: ");
+        console.log(batchDataRes.batchAssignedBatchVid);
+        let wellnessVideoID = batchDataRes.batchAssignedBatchVid;
+        let startDateData = batchDataRes.batchStartDate;
+
+        if (wellnessVideoID != "Waiting") {
+          const reqDoc = db.collection("videosBatch").doc(wellnessVideoID);
+
+          let batchData = await reqDoc.get();
+          let videosBatchRes = batchData.data();
+          // console.log(videosBatchRes)
+          let videoDaysArr = videosBatchRes.batchVideosData;
+          if (videosBatchRes == null || videosBatchRes == undefined) {
+            videosBatchRes = "No batch found!";
+          } else {
+            console.log("BATCH START DATE: " + startDateData);
+            var startDate = new Date(startDateData);
+
+            var daysDiff = moment().diff(startDate, "days");
+            daysDiff = parseInt(daysDiff) + 2;
+            console.log("Wellness Video DIFF DATEL: " + daysDiff);
+
+            // console.log('BATCH START DATE: ' + startDateData)
+            // var startDate = new Date(startDateData);
+
+            // var daysDiff = moment().diff(startDate, "days");
+            // console.log('CAL DIFF DATE: ' + daysDiff)
+            // daysDiff = (parseInt(daysDiff) + 2)
+            // console.log('DIFF DATEL: ' + daysDiff)
+
+            let notWellnessVidDays = [1, 5, 10, 7, 15];
+            // let daysAvail = [2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14]
+            // let currentDay = daysAvail[daysDiff]
+            // console.log('CURRENT DAY: ' + currentDay)
+
+            if (notWellnessVidDays.includes(daysDiff)) {
+              console.log("NOT WELLNESS VIDEO DAY!");
+              videoLink = "Invalid Date";
+
+              return res.status(200).send({
+                status: "Success",
+                data: videoLink,
+              });
+            } else {
+              console.log("WELLNESS VIDEO DAY!");
+              videoDaysArr.map((vidDay) => {
+                if (vidDay.day === daysDiff) {
+                  console.log("FOUND VIDEO LINK..");
+                  videoLink = vidDay.videoLink;
+
+                  return res.status(200).send({
+                    status: "Success",
+                    data: videoLink,
+                  });
+                }
+              });
+            }
+          }
+        }
+      }
+    }
+
+    return res.status(200).send({
+      status: "Success",
+      data: videoLink,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
 
 // GET TODAY's QUIZ
 app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
   // Get Quiz for current day BY Batch ID
-    try {
-      const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-      // GET BATCH DATA BY USER ID
-      let challengerData = await reqDoc.get();
-      let challengerRes = challengerData.data();
-      let stateValue = true
-      let quizData = ''
-      let quizComState = 'NA'
-      let currQuiz = ''
-      // console.log(challengerRes)
-      if(challengerRes === null || challengerRes === undefined) {
-        response = 'Cannot find challenger.'
-        stateValue = false
+  try {
+    const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
+    // GET BATCH DATA BY USER ID
+    let challengerData = await reqDoc.get();
+    let challengerRes = challengerData.data();
+    let stateValue = true;
+    let quizData = "";
+    let quizComState = "NA";
+    let currQuiz = "";
+    // console.log(challengerRes)
+    if (challengerRes === null || challengerRes === undefined) {
+      response = "Cannot find challenger.";
+      stateValue = false;
+    } else {
+      console.log("CHALLENGER BATCH ID: ");
+      console.log(challengerRes.groupId);
+      let batcHID = challengerRes.groupId;
+
+      let ch_CurrentQuiz = challengerRes.currentInProgressQuiz;
+      let ch_CurrentQuizNum = challengerRes.currentQuizNum;
+
+      const reqDoc = db.collection("batches").doc(batcHID);
+
+      let batchData = await reqDoc.get();
+      let batchDataRes = batchData.data();
+      let startDateData = batchDataRes.batchStartDate;
+
+      if (batchDataRes == null || batchDataRes == undefined) {
+        batchDataRes = "No batch found!";
+        quizComState = "NA";
       } else {
-        console.log("CHALLENGER BATCH ID: ")
-        console.log(challengerRes.groupId)
-        let batcHID = challengerRes.groupId
-        
-        let ch_CurrentQuiz = challengerRes.currentInProgressQuiz
-        let ch_CurrentQuizNum = challengerRes.currentQuizNum
-        
-        const reqDoc = db.collection("batches").doc(batcHID);
+        // GET QUIZ DATA BY QUIZ ID
+        console.log(batchDataRes);
 
-        let batchData = await reqDoc.get();
-        let batchDataRes = batchData.data();
-        let startDateData = batchDataRes.batchStartDate
-    
-        if (batchDataRes == null || batchDataRes == undefined) {
-          batchDataRes = "No batch found!";
-          quizComState = 'NA'
+        console.log("BATCH START DATE: " + startDateData);
+        var startDate = new Date(startDateData);
+
+        var daysDiff = moment().diff(startDate, "days");
+        console.log("CAL DIFF DATE: " + daysDiff);
+        daysDiff = parseInt(daysDiff) + 2;
+        console.log("DIFF DATEL: " + daysDiff);
+
+        let quizDays = [5, 10];
+
+        let checkQuizChallengerState = "";
+        // VALIDATE IF FIRST QUIZ OR SECOND QUIZ
+        if (ch_CurrentQuiz == "firstQuiz") {
+          checkQuizChallengerState = "1st";
+          currQuiz = "firstQuiz";
         } else {
-          // GET QUIZ DATA BY QUIZ ID
-          console.log(batchDataRes)
+          checkQuizChallengerState = "2nd";
+          currQuiz = "secondQuiz";
+        }
 
-          console.log('BATCH START DATE: ' + startDateData)
-          var startDate = new Date(startDateData);
-        
-          var daysDiff = moment().diff(startDate, "days");
-          console.log('CAL DIFF DATE: ' + daysDiff)
-          daysDiff = (parseInt(daysDiff) + 2)
-          console.log('DIFF DATEL: ' + daysDiff)
+        if (quizDays.includes(daysDiff)) {
+          if (daysDiff == 5) {
+            console.log("1st Quiz Day");
+          } else {
+            console.log("2nd Quiz Day");
+            if (checkQuizChallengerState != "2nd") {
+              // Update user by uChat id or userId to second quiz
+              const reqDoc = db
+                .collection("challengerDetails")
+                .doc(req.params.userID);
+              const reqDocChData = db
+                .collection("challengerDetails")
+                .doc(req.params.userID);
 
-          let quizDays = [5,10]
+              let challengerData = await reqDocChData.get();
+              let resChData = challengerData.data();
+              console.log(resChData);
 
-          let checkQuizChallengerState = ''
-          // VALIDATE IF FIRST QUIZ OR SECOND QUIZ 
-          if(ch_CurrentQuiz == 'firstQuiz') {
-            checkQuizChallengerState = '1st'
-            currQuiz = 'firstQuiz'
-          }else {
-            checkQuizChallengerState = '2nd'
-            currQuiz = 'secondQuiz'
-          }
+              await reqDoc.update({
+                currentInProgressQuiz: "secondQuiz",
+                currentQuizNum: 0,
+              });
 
-          if(quizDays.includes(daysDiff)) {
-            if(daysDiff == 5) {
-              console.log('1st Quiz Day')
-            } else {
-              console.log('2nd Quiz Day')
-              if(checkQuizChallengerState != '2nd') {
-                // Update user by uChat id or userId to second quiz
-                const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-                const reqDocChData = db.collection("challengerDetails").doc(req.params.userID);
-
-                let challengerData = await reqDocChData.get();
-                let resChData = challengerData.data();
-                console.log(resChData)
-
-                await reqDoc.update({
-                  currentInProgressQuiz: 'secondQuiz',
-                  currentQuizNum: 0
-                });
-
-                ch_CurrentQuizNum = 0
-              }
+              ch_CurrentQuizNum = 0;
             }
-
           }
+        }
 
-          if(quizDays.includes(daysDiff)) {
-            console.log('QUIZ DAY!')
-            if(daysDiff == 5) {
-              console.log('1st Quiz Day')
-              let firstQuizID = batchDataRes.batchAssignedQuiz
-              console.log('FIRST DAY QUIZ ID: ' + firstQuizID)
-              const reqDocA = db.collection("quizzes").doc(firstQuizID);
+        if (quizDays.includes(daysDiff)) {
+          console.log("QUIZ DAY!");
+          if (daysDiff == 5) {
+            console.log("1st Quiz Day");
+            let firstQuizID = batchDataRes.batchAssignedQuiz;
+            console.log("FIRST DAY QUIZ ID: " + firstQuizID);
+            const reqDocA = db.collection("quizzes").doc(firstQuizID);
 
-              let quizData = await reqDocA.get();
-              let quizInfo = quizData.data();
-                if(quizInfo != null || quizInfo != undefined) {
-                  console.log('1st DAY | QUIZ INFO')
-                  console.log(quizInfo)
-                  // console.log(ch_CurrentQuiz)
-                  console.log('Challenger Num: ' + ch_CurrentQuizNum)
-                  
-                  let numOfQuestions = quizInfo.quizQuestions.length
-                  console.log('1st QUIZ | Num Questions: ' + numOfQuestions)
-                  if(numOfQuestions == ch_CurrentQuizNum) {
-                    console.log('Completed the quiz!')
-                    quizComState = 'Complete'
-                  } else {
-                    console.log('InComplete quiz!')      
-                    quizComState = 'Incomplete'          
+            let quizData = await reqDocA.get();
+            let quizInfo = quizData.data();
+            if (quizInfo != null || quizInfo != undefined) {
+              console.log("1st DAY | QUIZ INFO");
+              console.log(quizInfo);
+              // console.log(ch_CurrentQuiz)
+              console.log("Challenger Num: " + ch_CurrentQuizNum);
 
-                  let quizPoints = quizInfo.quizPointsPerQuestion
-                  let questionDataA = quizInfo.quizQuestions[ch_CurrentQuizNum]
-                  console.log('1st QUIZ | QUESTION DATA')
-                  console.log(questionDataA)
-
-                  let corrAnswer = questionDataA.quizCorrectAnswer
-                  let inCorrAnsJson = {
-                    choice: corrAnswer
-                  }
-
-                  let availChoices = questionDataA.quizIncorrectAnswer.push(inCorrAnsJson)
-
-                  let shuffledChoices = shuffle(questionDataA.quizIncorrectAnswer)
-                  console.log('SHUFFLED CHOICES')
-                  console.log(shuffledChoices)
-
-                  questionDataA.quizIncorrectAnswer = shuffledChoices
-
-                  let quizResponseDataA = {
-                    points: quizPoints, 
-                    questionData: questionDataA
-                  }
-
-                  quizData = quizResponseDataA
-
-                  console.log('QUIZ DATA: ') 
-                  console.log(quizData)
-
-                  quizComState = 'Incomplete'
-
-                  return res.status(200).send({
-                    status: "Success",
-                    currentQuiz: 'firstDay',
-                    quizCompletionStatus: quizComState,
-                    data: quizData,
-                  });
-                }
+              let numOfQuestions = quizInfo.quizQuestions.length;
+              console.log("1st QUIZ | Num Questions: " + numOfQuestions);
+              if (numOfQuestions == ch_CurrentQuizNum) {
+                console.log("Completed the quiz!");
+                quizComState = "Complete";
               } else {
-                quizData = 'No data'
-                quizComState = 'NA'
-              }
+                console.log("InComplete quiz!");
+                quizComState = "Incomplete";
 
-            } else {
-              console.log('2nd Quiz Day')
-              let secondQuizID = batchDataRes.batchAssignedQuizB
+                let quizPoints = quizInfo.quizPointsPerQuestion;
+                let questionDataA = quizInfo.quizQuestions[ch_CurrentQuizNum];
+                console.log("1st QUIZ | QUESTION DATA");
+                console.log(questionDataA);
 
-              const reqDocB = db.collection("quizzes").doc(secondQuizID);
-
-              let quizDataB = await reqDocB.get();
-              let quizInfoB = quizDataB.data();
-              if(quizInfoB != null || quizInfoB != undefined) {
-                // quizData = quizInfoB
-                // console.log(quizInfoB);
-                // console.log(ch_CurrentQuiz)
-                // console.log(ch_CurrentQuizNum + 1)
-
-                let numOfQuestions = quizInfoB.quizQuestions.length
-                console.log(numOfQuestions)
-                if(numOfQuestions == ch_CurrentQuizNum) {
-                  console.log('Completed the quiz!')
-                  quizComState = 'Complete'
-                }else{
-                  console.log('InComplete quiz!')      
-                  quizComState = 'Incomplete'             
-
-                let quizPoints = quizInfoB.quizPointsPerQuestion
-                let questionData = quizInfoB.quizQuestions[ch_CurrentQuizNum]
-                console.log(questionData)
-
-                let corrAnswer = questionData.quizCorrectAnswer
+                let corrAnswer = questionDataA.quizCorrectAnswer;
                 let inCorrAnsJson = {
-                  choice: corrAnswer
-                }
+                  choice: corrAnswer,
+                };
 
-                let availChoices = questionData.quizIncorrectAnswer.push(inCorrAnsJson)
-                console.log(availChoices)
+                let availChoices =
+                  questionDataA.quizIncorrectAnswer.push(inCorrAnsJson);
 
-                
-                let shuffledChoices = shuffle(questionData.quizIncorrectAnswer)
-                console.log('SHUFFLED CHOICES')
-                console.log(shuffledChoices)
+                let shuffledChoices = shuffle(
+                  questionDataA.quizIncorrectAnswer
+                );
+                console.log("SHUFFLED CHOICES");
+                console.log(shuffledChoices);
 
-                questionData.quizIncorrectAnswer = shuffledChoices
+                questionDataA.quizIncorrectAnswer = shuffledChoices;
 
-                let quizResponseData = {
+                let quizResponseDataA = {
                   points: quizPoints,
-                  questionData: questionData
-                }
+                  questionData: questionDataA,
+                };
 
-                quizData = quizResponseData
+                quizData = quizResponseDataA;
 
-                quizComState = 'Incomplete'
+                console.log("QUIZ DATA: ");
+                console.log(quizData);
+
+                quizComState = "Incomplete";
 
                 return res.status(200).send({
                   status: "Success",
-                  currentQuiz: 'secondDay',
+                  currentQuiz: "firstDay",
                   quizCompletionStatus: quizComState,
                   data: quizData,
                 });
-                
-                }
-              } else {
-                quizData = 'No data'
-                quizComState = 'NA'
               }
-           
+            } else {
+              quizData = "No data";
+              quizComState = "NA";
             }
           } else {
-            console.log('Not Quiz Day')
-            quizComState = 'Incomplete'
-            quizData = 'Invalid Date'
+            console.log("2nd Quiz Day");
+            let secondQuizID = batchDataRes.batchAssignedQuizB;
+
+            const reqDocB = db.collection("quizzes").doc(secondQuizID);
+
+            let quizDataB = await reqDocB.get();
+            let quizInfoB = quizDataB.data();
+            if (quizInfoB != null || quizInfoB != undefined) {
+              // quizData = quizInfoB
+              // console.log(quizInfoB);
+              // console.log(ch_CurrentQuiz)
+              // console.log(ch_CurrentQuizNum + 1)
+
+              let numOfQuestions = quizInfoB.quizQuestions.length;
+              console.log(numOfQuestions);
+              if (numOfQuestions == ch_CurrentQuizNum) {
+                console.log("Completed the quiz!");
+                quizComState = "Complete";
+              } else {
+                console.log("InComplete quiz!");
+                quizComState = "Incomplete";
+
+                let quizPoints = quizInfoB.quizPointsPerQuestion;
+                let questionData = quizInfoB.quizQuestions[ch_CurrentQuizNum];
+                console.log(questionData);
+
+                let corrAnswer = questionData.quizCorrectAnswer;
+                let inCorrAnsJson = {
+                  choice: corrAnswer,
+                };
+
+                let availChoices =
+                  questionData.quizIncorrectAnswer.push(inCorrAnsJson);
+                console.log(availChoices);
+
+                let shuffledChoices = shuffle(questionData.quizIncorrectAnswer);
+                console.log("SHUFFLED CHOICES");
+                console.log(shuffledChoices);
+
+                questionData.quizIncorrectAnswer = shuffledChoices;
+
+                let quizResponseData = {
+                  points: quizPoints,
+                  questionData: questionData,
+                };
+
+                quizData = quizResponseData;
+
+                quizComState = "Incomplete";
+
+                return res.status(200).send({
+                  status: "Success",
+                  currentQuiz: "secondDay",
+                  quizCompletionStatus: quizComState,
+                  data: quizData,
+                });
+              }
+            } else {
+              quizData = "No data";
+              quizComState = "NA";
+            }
           }
-
+        } else {
+          console.log("Not Quiz Day");
+          quizComState = "Incomplete";
+          quizData = "Invalid Date";
         }
-
-        console.log('QUIZ DATA: ') 
-        console.log(quizData)
-
       }
-      
-      console.log('QUIZ DATA: ') 
-      console.log(quizData)
 
-      return res.status(200).send({
-        status: "Success",
-        currentQuiz: currQuiz,
-        quizCompletionStatus: quizComState,
-        data: quizData,
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
-      });
+      console.log("QUIZ DATA: ");
+      console.log(quizData);
     }
-  });
 
-  function shuffle(array) {
-    let currentIndex = array.length,  randomIndex;
-  
-    // While there remain elements to shuffle.
-    while (currentIndex != 0) {
-  
-      // Pick a remaining element.
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-  
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex], array[currentIndex]];
-    }
-  
-    return array;
+    console.log("QUIZ DATA: ");
+    console.log(quizData);
+
+    return res.status(200).send({
+      status: "Success",
+      currentQuiz: currQuiz,
+      quizCompletionStatus: quizComState,
+      data: quizData,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
+
+function shuffle(array) {
+  let currentIndex = array.length,
+    randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
   }
 
-  // Update user by uChat id or userId after answering the quiz question
-app.put("/api/v1/update/uchat/quiz/challenger/:id/:points/:quizPhase", async (req, res) => {
+  return array;
+}
+
+// Update user by uChat id or userId after answering the quiz question
+app.put(
+  "/api/v1/update/uchat/quiz/challenger/:id/:points/:quizPhase",
+  async (req, res) => {
     try {
       // Update user by uChat id or userId after answering the quiz question
       const reqDoc = db.collection("challengerDetails").doc(req.params.id);
-      let userPoints = req.params.points
-      let quizPhase = req.params.quizPhase
-      console.log('QUIZ PHASE: ' + quizPhase)
-      const reqDocChData = db.collection("challengerDetails").doc(req.params.id);
+      let userPoints = req.params.points;
+      let quizPhase = req.params.quizPhase;
+      console.log("QUIZ PHASE: " + quizPhase);
+      const reqDocChData = db
+        .collection("challengerDetails")
+        .doc(req.params.id);
 
       let challengerData = await reqDocChData.get();
       let resChData = challengerData.data();
       // console.log(resChData)
 
-      let newPoints = parseInt(resChData.groupPoints) + parseInt(userPoints)
-      console.log('New Points: ' + newPoints)
+      let newPoints = parseInt(resChData.groupPoints) + parseInt(userPoints);
+      console.log("New Points: " + newPoints);
 
-
-      if(quizPhase == 'firstQuiz') {
-        console.log('FIrst QUIZ')
+      if (quizPhase == "firstQuiz") {
+        console.log("FIrst QUIZ");
         await reqDoc.update({
           currentQuizNum: parseInt(resChData.currentQuizNum) + 1,
           groupPoints: newPoints,
-          firstQuizScore: resChData.firstQuizScore == 'Waiting' ? parseInt(userPoints) : parseInt(resChData.firstQuizScore) + parseInt(userPoints),
+          firstQuizScore:
+            resChData.firstQuizScore == "Waiting"
+              ? parseInt(userPoints)
+              : parseInt(resChData.firstQuizScore) + parseInt(userPoints),
         });
       } else {
-        console.log('Second QUIZ')
+        console.log("Second QUIZ");
         await reqDoc.update({
           currentQuizNum: parseInt(resChData.currentQuizNum) + 1,
           groupPoints: newPoints,
-          secondQuizScore: resChData.secondQuizScore == 'Waiting' ? parseInt(userPoints) : parseInt(resChData.secondQuizScore) + parseInt(userPoints),
-  
+          secondQuizScore:
+            resChData.secondQuizScore == "Waiting"
+              ? parseInt(userPoints)
+              : parseInt(resChData.secondQuizScore) + parseInt(userPoints),
         });
       }
 
@@ -1514,508 +1516,530 @@ app.put("/api/v1/update/uchat/quiz/challenger/:id/:points/:quizPhase", async (re
         msg: error,
       });
     }
-  });
-
+  }
+);
 
 // UPLOAD WEIGH IN Proof
 app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
-    try {
-      const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-      // GET BATCH DATA BY USER ID
-      let challengerData = await reqDoc.get();
-      let challengerRes = challengerData.data();
-      let stateValue = true
-      let quizData = ''
-      let quizComState = 'NA'
-      let currQuiz = ''
-      let stateUpload 
-      // console.log(challengerRes)
-      if(challengerRes === null || challengerRes === undefined) {
-        response = 'Cannot find challenger.'
-        stateValue = false
+  try {
+    const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
+    // GET BATCH DATA BY USER ID
+    let challengerData = await reqDoc.get();
+    let challengerRes = challengerData.data();
+    let stateValue = true;
+    let quizData = "";
+    let quizComState = "NA";
+    let currQuiz = "";
+    let stateUpload;
+    // console.log(challengerRes)
+    if (challengerRes === null || challengerRes === undefined) {
+      response = "Cannot find challenger.";
+      stateValue = false;
+    } else {
+      console.log("CHALLENGER BATCH ID: ");
+      console.log(challengerRes.groupId);
+      let batcHID = challengerRes.groupId;
+
+      let ch_CurrentQuiz = challengerRes.currentInProgressQuiz;
+      let ch_CurrentQuizNum = challengerRes.currentQuizNum;
+
+      const reqDoc = db.collection("batches").doc(batcHID);
+
+      let batchData = await reqDoc.get();
+      let batchDataRes = batchData.data();
+      let startDateData = batchDataRes.batchStartDate;
+
+      if (batchDataRes == null || batchDataRes == undefined) {
+        batchDataRes = "No batch found!";
+        quizComState = "NA";
       } else {
-        console.log("CHALLENGER BATCH ID: ")
-        console.log(challengerRes.groupId)
-        let batcHID = challengerRes.groupId
-        
-        let ch_CurrentQuiz = challengerRes.currentInProgressQuiz
-        let ch_CurrentQuizNum = challengerRes.currentQuizNum
-        
-        const reqDoc = db.collection("batches").doc(batcHID);
+        // GET QUIZ DATA BY QUIZ ID
 
-        let batchData = await reqDoc.get();
-        let batchDataRes = batchData.data();
-        let startDateData = batchDataRes.batchStartDate
-    
-        if (batchDataRes == null || batchDataRes == undefined) {
-          batchDataRes = "No batch found!";
-          quizComState = 'NA'
-        } else {
-          // GET QUIZ DATA BY QUIZ ID
+        console.log("BATCH START DATE: " + startDateData);
+        var startDate = new Date(startDateData);
 
-          console.log('BATCH START DATE: ' + startDateData)
-          var startDate = new Date(startDateData);
-        
-          var daysDiff = moment().diff(startDate, "days");
-          console.log('CAL DIFF DATE: ' + daysDiff)
-          daysDiff = (parseInt(daysDiff) + 2)
-          console.log('DIFF DATEL: ' + daysDiff)
+        var daysDiff = moment().diff(startDate, "days");
+        console.log("CAL DIFF DATE: " + daysDiff);
+        daysDiff = parseInt(daysDiff) + 2;
+        console.log("DIFF DATEL: " + daysDiff);
 
-          let quizDays = [7,15]
+        let quizDays = [7, 15];
 
-          if(quizDays.includes(daysDiff)) {
-            if(daysDiff == 7) {
-              console.log('1st Quiz Day')
-              const reqDocChData = db.collection("challengerDetails").doc(req.params.userID);
-              let challengerData = await reqDocChData.get();
-              let resChData = challengerData.data();
+        if (quizDays.includes(daysDiff)) {
+          if (daysDiff == 7) {
+            console.log("1st Quiz Day");
+            const reqDocChData = db
+              .collection("challengerDetails")
+              .doc(req.params.userID);
+            let challengerData = await reqDocChData.get();
+            let resChData = challengerData.data();
 
-              console.log('Current First Day Image Link: ' + resChData.firstWeighInImageProofLink)
+            console.log(
+              "Current First Day Image Link: " +
+                resChData.firstWeighInImageProofLink
+            );
 
-              stateUpload = resChData.firstWeighInImageProofLink != 'Waiting' ? 'Completed' : 'Incomplete'
+            stateUpload =
+              resChData.firstWeighInImageProofLink != "Waiting"
+                ? "Completed"
+                : "Incomplete";
 
-              currProgress = resChData.firstWeighInImageProofLink != 'Waiting' ? 'firstQuiz' : 'firstQuiz'
+            currProgress =
+              resChData.firstWeighInImageProofLink != "Waiting"
+                ? "firstQuiz"
+                : "firstQuiz";
 
-              currQuiz = currProgress
-              return res.status(200).send({
-                status: "Success",
-                currentQuiz: currProgress,
-                statusUpload: stateUpload
-              });
+            currQuiz = currProgress;
+            return res.status(200).send({
+              status: "Success",
+              currentQuiz: currProgress,
+              statusUpload: stateUpload,
+            });
+          } else if (daysDiff == 10) {
+            console.log("2nd Quiz Day");
+            // if(checkQuizChallengerState == '2nd') {
+            // Update user by uChat id or userId to second quiz
+            const reqDoc = db
+              .collection("challengerDetails")
+              .doc(req.params.userID);
+            const reqDocChData = db
+              .collection("challengerDetails")
+              .doc(req.params.userID);
 
-            } else if (daysDiff == 10) {
-              console.log('2nd Quiz Day')
-              // if(checkQuizChallengerState == '2nd') {
-                // Update user by uChat id or userId to second quiz
-                const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-                const reqDocChData = db.collection("challengerDetails").doc(req.params.userID);
+            let challengerData = await reqDocChData.get();
+            let resChData = challengerData.data();
 
-                let challengerData = await reqDocChData.get();
-                let resChData = challengerData.data();
+            stateUpload =
+              resChData.secondWeighInImageProofLink != "Waiting"
+                ? "Completed"
+                : "Incomplete";
 
-                stateUpload = resChData.secondWeighInImageProofLink != 'Waiting' ? 'Completed' : 'Incomplete'
+            currProgress =
+              resChData.secondWeighInImageProofLink != "Waiting"
+                ? "secondQuiz"
+                : "Complete";
 
-                currProgress = resChData.secondWeighInImageProofLink != 'Waiting' ? 'secondQuiz' : 'Complete'
+            currQuiz = currProgress;
 
-                currQuiz = currProgress
+            console.log("CHALLENGER DATA");
+            console.log(resChData);
 
-                console.log('CHALLENGER DATA')
-                console.log(resChData)
+            // stateUpload = 'Valid'
+            // currQuiz = resChData.currentInProgressQuiz
 
-                // stateUpload = 'Valid'
-                // currQuiz = resChData.currentInProgressQuiz
-
-                return res.status(200).send({
-                  status: "Success",
-                  currentQuiz: currProgress,
-                  statusUpload: stateUpload
-                });
-              // }
-            } else {
-              stateUpload = 'Invalid Date'
-            }
-
-            console.log("GG")
+            return res.status(200).send({
+              status: "Success",
+              currentQuiz: currProgress,
+              statusUpload: stateUpload,
+            });
+            // }
+          } else {
+            stateUpload = "Invalid Date";
           }
 
+          console.log("GG");
         }
       }
-
-      return res.status(200).send({
-        status: "Success",
-        currentQuiz: currQuiz,
-        statusUpload: stateUpload
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
-      });
     }
-  });
+
+    return res.status(200).send({
+      status: "Success",
+      currentQuiz: currQuiz,
+      statusUpload: stateUpload,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
 
 // Show Leaderboard Data By User Batch
 app.get("/api/v1/uchat/getLeaderBoardByBatchID/:userID", async (req, res) => {
   // Get Wellness Video for current day BY Batch ID
-    try {
+  try {
+    const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
+    // GET BATCH DATA BY USER ID
+    let challengerData = await reqDoc.get();
+    let challengerRes = challengerData.data();
 
-      const reqDoc = db.collection("challengerDetails").doc(req.params.userID);
-      // GET BATCH DATA BY USER ID
-      let challengerData = await reqDoc.get();
-      let challengerRes = challengerData.data();
-
-      // console.log(challengerRes)
-      if(challengerRes === null || challengerRes === undefined) {
-        response = 'Cannot find challenger.'
-
-      } else {
-        console.log("CHALLENGER BATCH ID: ")
-      let batcHID = challengerRes.groupId
-      console.log(batcHID)
+    // console.log(challengerRes)
+    if (challengerRes === null || challengerRes === undefined) {
+      response = "Cannot find challenger.";
+    } else {
+      console.log("CHALLENGER BATCH ID: ");
+      let batcHID = challengerRes.groupId;
+      console.log(batcHID);
 
       const reqDocBatch = db.collection("batches").doc(batcHID);
 
-      let requestedBatchID = batcHID
+      let requestedBatchID = batcHID;
 
       let batchData = await reqDocBatch.get();
       let batchDataRes = batchData.data();
 
-      let startDateData = batchDataRes.batchStartDate
+      let startDateData = batchDataRes.batchStartDate;
       // console.log(challengerRes)
-        if(batchDataRes === null || batchDataRes === undefined) {
-          let response = 'Cannot find marathon batch.'
-          console.log('Cannot find Marathon batch...')
-        } else {
-          // console.log(challengerRes)
-          console.log('Found Marathon Batch...')
-          let registeredChallengers = await fetchAllChallengerData()
-          console.log('Number of Challengers: ' + registeredChallengers.length)
+      if (batchDataRes === null || batchDataRes === undefined) {
+        let response = "Cannot find marathon batch.";
+        console.log("Cannot find Marathon batch...");
+      } else {
+        // console.log(challengerRes)
+        console.log("Found Marathon Batch...");
+        let registeredChallengers = await fetchAllChallengerData();
+        console.log("Number of Challengers: " + registeredChallengers.length);
 
-          console.log('BATCH START DATE: ' + startDateData)
-          var startDate = new Date(startDateData);
-        
-          var daysDiff = moment().diff(startDate, "days");
-          console.log('CAL DIFF DATE: ' + daysDiff)
-          daysDiff = (parseInt(daysDiff) + 2)
-          console.log('DIFF DATEL: ' + daysDiff)
+        console.log("BATCH START DATE: " + startDateData);
+        var startDate = new Date(startDateData);
 
-          let daysLeaderBoard = [7,15]
+        var daysDiff = moment().diff(startDate, "days");
+        console.log("CAL DIFF DATE: " + daysDiff);
+        daysDiff = parseInt(daysDiff) + 2;
+        console.log("DIFF DATEL: " + daysDiff);
 
-          if(daysLeaderBoard.includes(daysDiff)) {
-            let rankDataCh = []
-            let forLengthMatchedChar = []
-            for(let i = 0; i < registeredChallengers.length; i++) {
-              let chGroupID = registeredChallengers[i].groupId
-              if(chGroupID === requestedBatchID) {
-                forLengthMatchedChar.push(chGroupID)
-              }
+        let daysLeaderBoard = [7, 15];
+
+        if (daysLeaderBoard.includes(daysDiff)) {
+          let rankDataCh = [];
+          let forLengthMatchedChar = [];
+          for (let i = 0; i < registeredChallengers.length; i++) {
+            let chGroupID = registeredChallengers[i].groupId;
+            if (chGroupID === requestedBatchID) {
+              forLengthMatchedChar.push(chGroupID);
             }
-            console.log('Registered Challengers Length: ' + registeredChallengers.length)
-            registeredChallengers.map(challenger => {
-              // console.log(challenger)
-              let chGroupID = challenger.groupId
-              // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
-              if(chGroupID === requestedBatchID) {
-                console.log('MATCH CH BATCH ID')
-                let chName = `${challenger.firstName} ${challenger.lastName}`
-                let chGroupRank = challenger.groupRank
-                let chCurrentPoints = challenger.groupPoints
-    
-                // console.log(rankChPosB)
-    
-                // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
-    
-                let returnObject = {
-                  'challengerName': chName,
-                  'challengerRank': parseInt(chGroupRank) === 0 ? forLengthMatchedChar.length : parseInt(chGroupRank),
-                  'challengerPoints': parseInt(chCurrentPoints)
-                }
-    
-                rankDataCh.push(returnObject)
-              }
-    
-              return ''
-            })
-    
-              // SORT BY POINTS
-            var sortedTempRanking = rankDataCh.sort(function (a, b) {
-              let rankChPosA = a.challengerRank
-              let rankChPosB = b.challengerRank
-    
-              return rankChPosA - rankChPosB;
-            });
-    
-            let rankString = ''
-    
-            // STRING BUILDER
-            sortedTempRanking.map(chData => {
-              rankString += `${ordinal_suffix_of(chData.challengerRank)} ${chData.challengerName} - ${chData.challengerPoints} pts. \n`
-            })
-    
-            console.log(rankString)
-            
-            return res.status(200).send({
-              status: "Success",
-              rankDisplayText: rankString,
-              rankData: sortedTempRanking
-            });
-          } else {
-            console.log('NOT LEADERBOARD DATE')
-            return res.status(200).send({
-              status: "Success",
-              rankDisplayText: 'Invalid Date',
-              rankData: 'Invalid Date'
-            });
           }
-        }
+          console.log(
+            "Registered Challengers Length: " + registeredChallengers.length
+          );
+          registeredChallengers.map((challenger) => {
+            // console.log(challenger)
+            let chGroupID = challenger.groupId;
+            // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
+            if (chGroupID === requestedBatchID) {
+              console.log("MATCH CH BATCH ID");
+              let chName = `${challenger.firstName} ${challenger.lastName}`;
+              let chGroupRank = challenger.groupRank;
+              let chCurrentPoints = challenger.groupPoints;
 
+              // console.log(rankChPosB)
+
+              // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
+
+              let returnObject = {
+                challengerName: chName,
+                challengerRank:
+                  parseInt(chGroupRank) === 0
+                    ? forLengthMatchedChar.length
+                    : parseInt(chGroupRank),
+                challengerPoints: parseInt(chCurrentPoints),
+              };
+
+              rankDataCh.push(returnObject);
+            }
+
+            return "";
+          });
+
+          // SORT BY POINTS
+          var sortedTempRanking = rankDataCh.sort(function (a, b) {
+            let rankChPosA = a.challengerRank;
+            let rankChPosB = b.challengerRank;
+
+            return rankChPosA - rankChPosB;
+          });
+
+          let rankString = "";
+
+          // STRING BUILDER
+          sortedTempRanking.map((chData) => {
+            rankString += `${ordinal_suffix_of(chData.challengerRank)} ${
+              chData.challengerName
+            } - ${chData.challengerPoints} pts. \n`;
+          });
+
+          console.log(rankString);
+
+          return res.status(200).send({
+            status: "Success",
+            rankDisplayText: rankString,
+            rankData: sortedTempRanking,
+          });
+        } else {
+          console.log("NOT LEADERBOARD DATE");
+          return res.status(200).send({
+            status: "Success",
+            rankDisplayText: "Invalid Date",
+            rankData: "Invalid Date",
+          });
+        }
       }
-      return res.status(200).send({
-        status: "Success",
-        currentQuiz: 'ERR',
-        statusUpload: 'ERR'
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
-      });
     }
-  });
+    return res.status(200).send({
+      status: "Success",
+      currentQuiz: "ERR",
+      statusUpload: "ERR",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
 
 // Show Leaderboard Data By Batch
 app.get("/api/v1/getLeaderBoardByBatch/:batchID", async (req, res) => {
   // Get Wellness Video for current day BY Batch ID
-    try {
+  try {
+    const reqDocBatch = db.collection("batches").doc(req.params.batchID);
 
-      const reqDocBatch = db.collection("batches").doc(req.params.batchID);
+    let requestedBatchID = req.params.batchID;
 
-      let requestedBatchID = req.params.batchID
+    let batchData = await reqDocBatch.get();
+    let batchDataRes = batchData.data();
 
-      let batchData = await reqDocBatch.get();
-      let batchDataRes = batchData.data();
-
-      let startDateData = batchDataRes.batchStartDate
+    let startDateData = batchDataRes.batchStartDate;
+    // console.log(challengerRes)
+    if (batchDataRes === null || batchDataRes === undefined) {
+      let response = "Cannot find marathon batch.";
+      console.log("Cannot find Marathon batch...");
+    } else {
       // console.log(challengerRes)
-        if(batchDataRes === null || batchDataRes === undefined) {
-          let response = 'Cannot find marathon batch.'
-          console.log('Cannot find Marathon batch...')
-        } else {
-          // console.log(challengerRes)
-          console.log('Found Marathon Batch...')
-          let registeredChallengers = await fetchAllChallengerData()
-          console.log('Number of Challengers: ' + registeredChallengers.length)
+      console.log("Found Marathon Batch...");
+      let registeredChallengers = await fetchAllChallengerData();
+      console.log("Number of Challengers: " + registeredChallengers.length);
 
-            let rankDataCh = []
-            let forLengthMatchedChar = []
-            for(let i = 0; i < registeredChallengers.length; i++) {
-              let chGroupID = registeredChallengers[i].groupId
-              if(chGroupID === requestedBatchID) {
-                forLengthMatchedChar.push(chGroupID)
-              }
-            }
-            console.log('Registered Challengers Length: ' + registeredChallengers.length)
-            registeredChallengers.map(challenger => {
-              // console.log(challenger)
-              let chGroupID = challenger.groupId
-              // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
-              if(chGroupID === requestedBatchID) {
-                console.log('MATCH CH BATCH ID')
-                let chName = `${challenger.firstName} ${challenger.lastName}`
-                let chGroupRank = challenger.groupRank
-                let chCurrentPoints = challenger.groupPoints
-                let chProfileImage = challenger.selfieLink
-    
-                // console.log(rankChPosB)
-    
-                // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
-    
-                let returnObject = {
-                  'challengerName': chName,
-                  'challengerRank': parseInt(chGroupRank) === 0 ? forLengthMatchedChar.length : parseInt(chGroupRank),
-                  'challengerPoints': parseInt(chCurrentPoints),
-                  'challengerSelfie': chProfileImage
-                }
-    
-                rankDataCh.push(returnObject)
-              }
-    
-              return ''
-            })
-    
-              // SORT BY POINTS
-            var sortedTempRanking = rankDataCh.sort(function (a, b) {
-              let rankChPosA = a.challengerRank
-              let rankChPosB = b.challengerRank
-    
-              return rankChPosA - rankChPosB;
-            });
-    
-            let rankString = ''
-    
-            // STRING BUILDER
-            sortedTempRanking.map(chData => {
-              rankString += `${ordinal_suffix_of(chData.challengerRank)} ${chData.challengerName} - ${chData.challengerPoints} pts. \n`
-            })
-    
-            console.log(rankString)
-            
-            return res.status(200).send({
-              status: "Success",
-              rankDisplayText: rankString,
-              rankData: sortedTempRanking,
-              batchID: batchDataRes.id,
-              batchName: batchDataRes.batchName
-            });
+      let rankDataCh = [];
+      let forLengthMatchedChar = [];
+      for (let i = 0; i < registeredChallengers.length; i++) {
+        let chGroupID = registeredChallengers[i].groupId;
+        if (chGroupID === requestedBatchID) {
+          forLengthMatchedChar.push(chGroupID);
         }
+      }
+      console.log(
+        "Registered Challengers Length: " + registeredChallengers.length
+      );
+      registeredChallengers.map((challenger) => {
+        // console.log(challenger)
+        let chGroupID = challenger.groupId;
+        // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
+        if (chGroupID === requestedBatchID) {
+          console.log("MATCH CH BATCH ID");
+          let chName = `${challenger.firstName} ${challenger.lastName}`;
+          let chGroupRank = challenger.groupRank;
+          let chCurrentPoints = challenger.groupPoints;
+          let chProfileImage = challenger.selfieLink;
+
+          // console.log(rankChPosB)
+
+          // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
+
+          let returnObject = {
+            challengerName: chName,
+            challengerRank:
+              parseInt(chGroupRank) === 0
+                ? forLengthMatchedChar.length
+                : parseInt(chGroupRank),
+            challengerPoints: parseInt(chCurrentPoints),
+            challengerSelfie: chProfileImage,
+          };
+
+          rankDataCh.push(returnObject);
+        }
+
+        return "";
+      });
+
+      // SORT BY POINTS
+      var sortedTempRanking = rankDataCh.sort(function (a, b) {
+        let rankChPosA = a.challengerRank;
+        let rankChPosB = b.challengerRank;
+
+        return rankChPosA - rankChPosB;
+      });
+
+      let rankString = "";
+
+      // STRING BUILDER
+      sortedTempRanking.map((chData) => {
+        rankString += `${ordinal_suffix_of(chData.challengerRank)} ${
+          chData.challengerName
+        } - ${chData.challengerPoints} pts. \n`;
+      });
+
+      console.log(rankString);
 
       return res.status(200).send({
         status: "Success",
-        currentQuiz: 'ERR',
-        statusUpload: 'ERR'
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
+        rankDisplayText: rankString,
+        rankData: sortedTempRanking,
+        batchID: batchDataRes.id,
+        batchName: batchDataRes.batchName,
       });
     }
-  });
 
+    return res.status(200).send({
+      status: "Success",
+      currentQuiz: "ERR",
+      statusUpload: "ERR",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
 
 // Show Leaderboard Data for all batches
 app.get("/api/v1/getLeaderBoard", async (req, res) => {
-    try {
-      // GET ALL BATCHES FIRST
-      const reqDoc = db.collection("batches");
+  try {
+    // GET ALL BATCHES FIRST
+    const reqDoc = db.collection("batches");
 
-      let batchRes = [];
-      let rankDataJson = []
-  
-      await reqDoc.get().then((data) => {
-        let docs = data.docs;
-  
-        docs.map((doc) => {
-          const selectedItem = {
-            id: doc.data().id,
-            batchName: doc.data().batchName,
-            batchChallengeType: doc.data().batchChallengeType,
-            batchStatusState: doc.data().batchStatusState,
-            batchCreatedDate: doc.data().batchCreatedDate,
-            batchCreator: doc.data().batchCreator,
-            batchImageLink: doc.data().batchImageLink,
-            batchStartDate: doc.data().batchStartDate,
-            batchEndDate: doc.data().batchEndDate,
-            batchStartRunTime: doc.data().batchStartRunTime,
-            batchAssignedCoach: doc.data().batchAssignedCoach,
-            batchAssignedBatchVid: doc.data().batchAssignedBatchVid,
-            batchAssignedQuiz: doc.data().batchAssignedQuiz,
-            batchAssignedQuizB: doc.data().batchAssignedQuizB,
-            batchTotalChallengers: doc.data().batchTotalChallengers,
-            batchChallengers: doc.data().batchChallengers,
-          };
-  
-          batchRes.push(selectedItem);
-        });
-        return batchRes;
+    let batchRes = [];
+    let rankDataJson = [];
+
+    await reqDoc.get().then((data) => {
+      let docs = data.docs;
+
+      docs.map((doc) => {
+        const selectedItem = {
+          id: doc.data().id,
+          batchName: doc.data().batchName,
+          batchChallengeType: doc.data().batchChallengeType,
+          batchStatusState: doc.data().batchStatusState,
+          batchCreatedDate: doc.data().batchCreatedDate,
+          batchCreator: doc.data().batchCreator,
+          batchImageLink: doc.data().batchImageLink,
+          batchStartDate: doc.data().batchStartDate,
+          batchEndDate: doc.data().batchEndDate,
+          batchStartRunTime: doc.data().batchStartRunTime,
+          batchAssignedCoach: doc.data().batchAssignedCoach,
+          batchAssignedBatchVid: doc.data().batchAssignedBatchVid,
+          batchAssignedQuiz: doc.data().batchAssignedQuiz,
+          batchAssignedQuizB: doc.data().batchAssignedQuizB,
+          batchTotalChallengers: doc.data().batchTotalChallengers,
+          batchChallengers: doc.data().batchChallengers,
+        };
+
+        batchRes.push(selectedItem);
       });
+      return batchRes;
+    });
 
-      if(batchRes === null || batchRes === undefined) {
-        console.log('No Batch Data Found')
-        batchRes = []
-      } else {
-        console.log('Batch Data Found: ' + batchRes.length)
-        let registeredChallengers = await fetchAllChallengerData()
+    if (batchRes === null || batchRes === undefined) {
+      console.log("No Batch Data Found");
+      batchRes = [];
+    } else {
+      console.log("Batch Data Found: " + batchRes.length);
+      let registeredChallengers = await fetchAllChallengerData();
 
-        
-        let rankStringData = ''
+      let rankStringData = "";
 
-        for(let b = 0; b < batchRes.length; b++) {
+      for (let b = 0; b < batchRes.length; b++) {
+        let batch = batchRes[b];
 
-          let batch = batchRes[b]
-
-          let forLengthMatchedChar = []
-          for(let i = 0; i < registeredChallengers.length; i++) {
-            let chGroupID = registeredChallengers[i].groupId
-            if(chGroupID === batch.id) {
-              forLengthMatchedChar.push(chGroupID)
-            }
+        let forLengthMatchedChar = [];
+        for (let i = 0; i < registeredChallengers.length; i++) {
+          let chGroupID = registeredChallengers[i].groupId;
+          if (chGroupID === batch.id) {
+            forLengthMatchedChar.push(chGroupID);
           }
+        }
 
-          let rankDataCh = []
+        let rankDataCh = [];
 
-          registeredChallengers.map(challenger => {
-            // console.log(challenger)
-            let chGroupID = challenger.groupId
-            // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
-            if(chGroupID === batch.id) {
+        registeredChallengers.map((challenger) => {
+          // console.log(challenger)
+          let chGroupID = challenger.groupId;
+          // console.log(`RequestBatch: ${requestedBatchID} === ${chGroupID} :ChBatchID`)
+          if (chGroupID === batch.id) {
+            // console.log('MATCH CH BATCH ID')
+            let chName = `${challenger.firstName} ${challenger.lastName}`;
+            let chGroupRank = challenger.groupRank;
+            let chCurrentPoints = challenger.groupPoints;
+            let chProfileImage = challenger.selfieLink;
 
-              // console.log('MATCH CH BATCH ID')
-              let chName = `${challenger.firstName} ${challenger.lastName}`
-              let chGroupRank = challenger.groupRank
-              let chCurrentPoints = challenger.groupPoints
-              let chProfileImage = challenger.selfieLink
-  
-              // console.log(rankChPosB)
-  
-              // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
-  
-              let returnObject = {
-                'challengerName': chName,
-                'challengerRank': parseInt(chGroupRank) === 0 ? forLengthMatchedChar.length : parseInt(chGroupRank),
-                'challengerPoints': parseInt(chCurrentPoints),
-                'challengerSelfie': chProfileImage
-              }
+            // console.log(rankChPosB)
 
-            rankDataCh.push(returnObject)
+            // rankChPosA === 0 ? forLengthMatchedChar.length : rankChPosA
 
-                            // SORT BY POINTS
+            let returnObject = {
+              challengerName: chName,
+              challengerRank:
+                parseInt(chGroupRank) === 0
+                  ? forLengthMatchedChar.length
+                  : parseInt(chGroupRank),
+              challengerPoints: parseInt(chCurrentPoints),
+              challengerSelfie: chProfileImage,
+            };
+
+            rankDataCh.push(returnObject);
+
+            // SORT BY POINTS
             var sortedTempRanking = rankDataCh.sort(function (a, b) {
-              let rankChPosA = a.challengerRank
-              let rankChPosB = b.challengerRank
-    
+              let rankChPosA = a.challengerRank;
+              let rankChPosB = b.challengerRank;
+
               return rankChPosA - rankChPosB;
             });
-    
-            let rankString = ''
-    
+
+            let rankString = "";
+
             // STRING BUILDER
             // sortedTempRanking.map(chData => {
             //   rankString += `${ordinal_suffix_of(chData.challengerRank)} ${chData.challengerName} - ${chData.challengerPoints} pts. \n`
             // })
-    
+
             // console.log(rankString)
-
-            }
-
-          })
-          console.log(rankDataCh.length)
-          if(rankDataCh.length > 0) {
-            let fixedJsonBatch = {
-              rankData: rankDataCh,
-              batchID: batch.id,
-              batchName: batch.batchName
-            }
-            rankDataJson.push(fixedJsonBatch)
           }
-          
-
+        });
+        console.log(rankDataCh.length);
+        if (rankDataCh.length > 0) {
+          let fixedJsonBatch = {
+            rankData: rankDataCh,
+            batchID: batch.id,
+            batchName: batch.batchName,
+          };
+          rankDataJson.push(fixedJsonBatch);
         }
-
       }
-
-      return res.status(200).send({
-        status: "Success",
-        allLeaderboard: rankDataJson,
-        rankData: 'ERR'
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(500).send({
-        status: "Failed",
-        msg: err,
-      });
     }
-  });
+
+    return res.status(200).send({
+      status: "Success",
+      allLeaderboard: rankDataJson,
+      rankData: "ERR",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
 
 // Get getMarathonJourneyStat
 app.get("/api/v1/getMarathonJourneyStat", async (req, res) => {
   try {
+    let registeredChallengers = await fetchAllChallengerData();
+    let totalRegisteredChallengeres = [];
+    let totalPendingChallengers = [];
 
-    let registeredChallengers = await fetchAllChallengerData()
-    let totalRegisteredChallengeres = []
-    let totalPendingChallengers = []
-
-    registeredChallengers.map(challenger => {
-      if(challenger.groupId != 'Waiting') {
-        totalRegisteredChallengeres.push(challenger)
-      } else  {
-        totalPendingChallengers.push(challenger)
+    registeredChallengers.map((challenger) => {
+      if (challenger.groupId != "Waiting") {
+        totalRegisteredChallengeres.push(challenger);
+      } else {
+        totalPendingChallengers.push(challenger);
       }
-    })
+    });
 
     const reqDoc = db.collection("batches");
 
@@ -2045,7 +2069,7 @@ app.get("/api/v1/getMarathonJourneyStat", async (req, res) => {
 
         batchRes.push(selectedItem);
       });
-    })
+    });
 
     return res.status(200).send({
       status: "Success",
@@ -2054,8 +2078,7 @@ app.get("/api/v1/getMarathonJourneyStat", async (req, res) => {
       batches: batchRes,
       numberOfRegisteredChallengers: totalRegisteredChallengeres.length,
       numberOfPendingChallengers: totalPendingChallengers.length,
-      numberOfBatches: batchRes.length
-
+      numberOfBatches: batchRes.length,
     });
   } catch (err) {
     console.log(err);
@@ -2066,20 +2089,20 @@ app.get("/api/v1/getMarathonJourneyStat", async (req, res) => {
   }
 });
 
-  // Function to convert number to suffixed term
+// Function to convert number to suffixed term
 function ordinal_suffix_of(i) {
-    var j = i % 10,
-        k = i % 100;
-    if (j == 1 && k != 11) {
-        return i + "st";
-    }
-    if (j == 2 && k != 12) {
-        return i + "nd";
-    }
-    if (j == 3 && k != 13) {
-        return i + "rd";
-    }
-    return i + "th";
+  var j = i % 10,
+    k = i % 100;
+  if (j == 1 && k != 11) {
+    return i + "st";
+  }
+  if (j == 2 && k != 12) {
+    return i + "nd";
+  }
+  if (j == 3 && k != 13) {
+    return i + "rd";
+  }
+  return i + "th";
 }
 
 // Function to get all challengers
@@ -2136,8 +2159,6 @@ async function fetchAllChallengerData() {
     });
     return response;
   });
-
-
 }
 
 // exports the api to firebase cloud functions
