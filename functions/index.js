@@ -434,6 +434,7 @@ app.get("/api/v1/challengers", async (req, res) => {
       let docs = data.docs;
 
       docs.map((doc) => {
+        console.log(doc);
         const selectedItem = {
           id: doc.data().id,
           uChatUserId: doc.data().uChatUserId,
@@ -466,7 +467,80 @@ app.get("/api/v1/challengers", async (req, res) => {
           firstWeighIn: doc.data().firstWeighIn,
           firstWeighInImageProofLink: doc.data().firstWeighInImageProofLink,
           secondWeighIn: doc.data().secondWeighIn,
-          secondWeighInImageProofLink: doc.data().secondWeighIn,
+          secondWeighInImageProofLink: doc.data().secondWeighInImageProofLink,
+          firstQuizScore: doc.data().firstQuizScore,
+          secondQuizScore: doc.data().secondQuizScore,
+          weighInWeightProof: doc.data().weighInWeightProof,
+          beforeBodyPicture: doc.data().beforeBodyPicture,
+          afterBodyPicture: doc.data().afterBodyPicture,
+        };
+
+        response.push(selectedItem);
+      });
+      return response;
+    });
+
+    return res.status(200).send({
+      status: "Success",
+      data: response,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
+
+app.get("/api/v2/challengers", async (req, res) => {
+  // GET ALL CHALLENGERS
+  try {
+    const reqDoc = db.collection("challengerDetails");
+
+    let response = [];
+
+    await reqDoc.get().then((data) => {
+      let docs = data.docs;
+
+      docs.map((doc) => {
+        console.log(doc);
+        const selectedItem = {
+          id: doc.data().id,
+          uChatUserId: doc.data().uChatUserId,
+          firstName: doc.data().firstName,
+          lastName: doc.data().lastName,
+          emailAddress: doc.data().emailAddress,
+          age: doc.data().age,
+          sex: doc.data().sex,
+
+          currentQuizNum: doc.data().currentQuizNum,
+          currentInProgressQuiz: doc.data().currentInProgressQuiz,
+
+          height: doc.data().height,
+
+          //weightInfo: doc.data().weightInfo,
+
+          originalWeight: doc.data().weightInfo.originalWeight,
+          latestWeight: doc.data().weightInfo.latestWeight,
+          lastWeightUpdateDate: doc.data().weightInfo.lastWeightUpdateDate,
+          weightDifference: doc.data().weightInfo.weightDifference,
+
+          groupId: doc.data().groupId,
+          challengeTypeId: doc.data().challengeTypeId,
+          coachId: doc.data().coachId,
+          dateStarted: doc.data().dateStarted,
+          groupRank: doc.data().groupRank,
+          groupPoints: doc.data().groupPoints,
+          userVerified: doc.data().userVerified,
+          proofOfBillingLink: doc.data().proofOfBillingLink,
+          userCode: doc.data().userCode,
+          selfieLink: doc.data().selfieLink,
+          weightProofLink: doc.data().weightProofLink,
+          firstWeighIn: doc.data().firstWeighIn,
+          firstWeighInImageProofLink: doc.data().firstWeighInImageProofLink,
+          secondWeighIn: doc.data().secondWeighIn,
+          secondWeighInImageProofLink: doc.data().secondWeighInImageProofLink,
           firstQuizScore: doc.data().firstQuizScore,
           secondQuizScore: doc.data().secondQuizScore,
           weighInWeightProof: doc.data().weighInWeightProof,
@@ -535,7 +609,7 @@ app.get("/api/v1/batch/challengers/:batchID", async (req, res) => {
           firstWeighIn: doc.data().firstWeighIn,
           firstWeighInImageProofLink: doc.data().firstWeighInImageProofLink,
           secondWeighIn: doc.data().secondWeighIn,
-          secondWeighInImageProofLink: doc.data().secondWeighIn,
+          secondWeighInImageProofLink: doc.data().secondWeighInImageProofLink,
           firstQuizScore: doc.data().firstQuizScore,
           secondQuizScore: doc.data().secondQuizScore,
           weighInWeightProof: doc.data().weighInWeightProof,
@@ -883,6 +957,48 @@ app.get("/api/v1/wellnessVideo/getVideo/:batchID", async (req, res) => {
   }
 });
 
+// Get Wellness Video for current day BY Batch ID
+app.get(
+  "/api/v1/wellnessVideo/getSpecificVideoData/:batchID/:videoID",
+  async (req, res) => {
+    // Get Wellness Video Specific for current day BY Batch ID
+    try {
+      const reqDoc = db.collection("videosBatch").doc(req.params.batchID);
+
+      let batchData = await reqDoc.get();
+      let response = batchData.data();
+
+      if (response == null || response == undefined) {
+        response = "No batch found!";
+      } else {
+        response = response;
+
+        let videoID = req.params.videoID;
+
+        let batchVideos = response.batchVideosData;
+        for (let i = 0; i < batchVideos.length; i++) {
+          // console.log(batchVideos[i]);
+          if (batchVideos[i].videoID == videoID) {
+            console.log(batchVideos[i]);
+            response = batchVideos[i];
+          }
+        }
+      }
+
+      return res.status(200).send({
+        status: "Success",
+        data: response,
+      });
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send({
+        status: "Failed",
+        msg: err,
+      });
+    }
+  }
+);
+
 // UPDATE -- PUT METHOD -----------------------------------------------------------
 
 app.put("/api/v1/update/challenger/:id", async (req, res) => {
@@ -1139,7 +1255,7 @@ app.get("/api/v1/uchat/getCurrentWellnessVideo/:userID", async (req, res) => {
             var startDate = new Date(startDateData);
 
             var daysDiff = moment().diff(startDate, "days");
-            daysDiff = parseInt(daysDiff) + 2;
+            daysDiff = parseInt(daysDiff);
             console.log("Wellness Video DIFF DATEL: " + daysDiff);
 
             // console.log('BATCH START DATE: ' + startDateData)
@@ -1237,14 +1353,14 @@ app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
 
         var daysDiff = moment().diff(startDate, "days");
         console.log("CAL DIFF DATE: " + daysDiff);
-        daysDiff = parseInt(daysDiff) + 2;
+        daysDiff = parseInt(daysDiff) + 1;
         console.log("DIFF DATEL: " + daysDiff);
 
         let quizDays = [5, 10];
 
         let checkQuizChallengerState = "";
         // VALIDATE IF FIRST QUIZ OR SECOND QUIZ
-        if (ch_CurrentQuiz == "firstQuiz") {
+        if (ch_CurrentQuiz == "firstQuiz" || ch_CurrentQuiz == "firstDay") {
           checkQuizChallengerState = "1st";
           currQuiz = "firstQuiz";
         } else {
