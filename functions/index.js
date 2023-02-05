@@ -1,6 +1,6 @@
 const functions = require("firebase-functions");
 const moment = require("moment");
-
+const momentTimeZone = require("moment-timezone");
 const admin = require("firebase-admin");
 
 var serviceAccount = require("./serviceAccountKey.json");
@@ -33,10 +33,79 @@ const quizCollection = db.collection("quizzes");
 const categoryCollection = db.collection("categories");
 const videosBatchCollection = db.collection("videosBatch");
 
+const hondaModelCollection = db.collection("hondalCollection");
+
 // ROUTES
 app.get("/api/v1", (req, res) => {
   return res.status(200).send("Test GET Method HerbalLife Backend.....");
 });
+
+// HONDA -- COLLECTIONS ------------------------------------------------------
+app.post("/api/v1/honda/create/car", async (req, res) => {
+  try {
+    let carID = "HONDA" + new Date().getTime();
+    // console.log(req.body);
+    await hondaModelCollection.doc(`/${carID}/`).set({
+      cardID: carID,
+      carName: req.body.carName,
+      carDesc: req.body.carDesc,
+    });
+
+    return res.status(200).send({
+      status: "Success",
+      msg: "Data Saved",
+      data: req.body,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: "Failed",
+      msg: error,
+    });
+  }
+});
+
+// CHECK QUERY
+app.get("/api/v1/honda/getQueryResult/:searchString", async (req, res) => {
+  // GET ALL BATCHES
+  try {
+    const reqDoc = db.collection("hondalCollection");
+    let inputSearchString = req.params.searchString;
+    console.log("QUERY STRING: " + inputSearchString);
+
+    let response = [];
+
+    await reqDoc.get().then((data) => {
+      let docs = data.docs;
+
+      docs.map((doc) => {
+        const selectedItem = {
+          cardID: doc.data().cardID,
+          carName: doc.data().carName,
+          carDesc: doc.data().carDesc,
+        };
+
+        response.push(selectedItem);
+      });
+      return response;
+    });
+
+    return res.status(200).send({
+      status: "Success",
+      data: response,
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
+
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 // CREATE Challenger -- POST METHOD -----------------------------------------------------------
 app.post("/api/v1/create/user", async (req, res) => {
@@ -1157,6 +1226,26 @@ app.delete("/api/v1/delete/batch/:id", async (req, res) => {
   }
 });
 
+// DELETE Challenger
+app.delete("/api/v1/delete/challenger/:id", async (req, res) => {
+  // DELETE Challenger
+  try {
+    const reqDoc = db.collection("challengerDetails").doc(req.params.id);
+    await reqDoc.delete();
+
+    return res.status(200).send({
+      status: "Success",
+      msg: `Challenger with ID ${req.params.id} has been deleted!`,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      status: "Failed",
+      msg: error,
+    });
+  }
+});
+
 app.delete("/api/v1/delete/videosBatch/:id", async (req, res) => {
   // DELETE VIDEO BATCH
   try {
@@ -1252,26 +1341,14 @@ app.get("/api/v1/uchat/getCurrentWellnessVideo/:userID", async (req, res) => {
             videosBatchRes = "No batch found!";
           } else {
             console.log("BATCH START DATE: " + startDateData);
-            var startDate = new Date(startDateData);
 
-            var daysDiff = moment().diff(startDate, "days");
-            daysDiff = parseInt(daysDiff);
-            console.log("Wellness Video DIFF DATEL: " + daysDiff);
+            let diffDays = getDayDiff(startDateData);
+            console.log(diffDays + " days");
 
-            // console.log('BATCH START DATE: ' + startDateData)
-            // var startDate = new Date(startDateData);
-
-            // var daysDiff = moment().diff(startDate, "days");
-            // console.log('CAL DIFF DATE: ' + daysDiff)
-            // daysDiff = (parseInt(daysDiff) + 2)
-            // console.log('DIFF DATEL: ' + daysDiff)
-
-            let notWellnessVidDays = [1, 5, 10, 7, 15];
+            let notWellnessVidDays = [0, 1, 5, 10, 7, 15];
             // let daysAvail = [2, 3, 4, 6, 7, 8, 9, 11, 12, 13, 14]
-            // let currentDay = daysAvail[daysDiff]
-            // console.log('CURRENT DAY: ' + currentDay)
 
-            if (notWellnessVidDays.includes(daysDiff)) {
+            if (notWellnessVidDays.includes(diffDays)) {
               console.log("NOT WELLNESS VIDEO DAY!");
               videoLink = "Invalid Date";
 
@@ -1282,7 +1359,7 @@ app.get("/api/v1/uchat/getCurrentWellnessVideo/:userID", async (req, res) => {
             } else {
               console.log("WELLNESS VIDEO DAY!");
               videoDaysArr.map((vidDay) => {
-                if (vidDay.day === daysDiff) {
+                if (vidDay.day === diffDays) {
                   console.log("FOUND VIDEO LINK..");
                   videoLink = vidDay.videoLink;
 
@@ -1310,6 +1387,32 @@ app.get("/api/v1/uchat/getCurrentWellnessVideo/:userID", async (req, res) => {
     });
   }
 });
+
+function getDayDiff(startDateData) {
+  // Asia/Manila
+
+  console.log("MOMENT:");
+  // var time = moment(new Date().toLocaleTimeString()).utc();
+  let currentPHDate = moment.tz(moment(), "Asia/Manila").format("MM/DD/YYYY");
+  // console.log(moment(time, startDate).fromNow());
+
+  // const date1 = new Date("7/13/2010");
+  console.log(currentPHDate);
+  const date1 = new Date(currentPHDate);
+  const date2 = new Date(startDateData);
+  const diffTime = Math.abs(date2 - date1);
+  let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  diffDays = diffDays + 1;
+  console.log(diffTime + " milliseconds");
+  console.log(diffDays + " days");
+  console.log("DIFF DAYS: " + diffDays);
+  return diffDays;
+}
+
+function convertUTCDateToLocalDate(date) {
+  var newDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+  return newDate;
+}
 
 // GET TODAY's QUIZ
 app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
@@ -1349,12 +1452,8 @@ app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
         console.log(batchDataRes);
 
         console.log("BATCH START DATE: " + startDateData);
-        var startDate = new Date(startDateData);
 
-        var daysDiff = moment().diff(startDate, "days");
-        console.log("CAL DIFF DATE: " + daysDiff);
-        daysDiff = parseInt(daysDiff) + 1;
-        console.log("DIFF DATEL: " + daysDiff);
+        var daysDiff = getDayDiff(startDateData);
 
         let quizDays = [5, 10];
 
@@ -1672,12 +1771,9 @@ app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
         // GET QUIZ DATA BY QUIZ ID
 
         console.log("BATCH START DATE: " + startDateData);
-        var startDate = new Date(startDateData);
+        // var startDate = new Date(startDateData);
 
-        var daysDiff = moment().diff(startDate, "days");
-        console.log("CAL DIFF DATE: " + daysDiff);
-        daysDiff = parseInt(daysDiff) + 2;
-        console.log("DIFF DATEL: " + daysDiff);
+        var daysDiff = getDayDiff(startDateData);
 
         let quizDays = [7, 15];
 
@@ -1711,7 +1807,7 @@ app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
               currentQuiz: currProgress,
               statusUpload: stateUpload,
             });
-          } else if (daysDiff == 10) {
+          } else if (daysDiff == 15) {
             console.log("2nd Quiz Day");
             // if(checkQuizChallengerState == '2nd') {
             // Update user by uChat id or userId to second quiz
@@ -1742,6 +1838,9 @@ app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
 
             // stateUpload = 'Valid'
             // currQuiz = resChData.currentInProgressQuiz
+
+            // currProgress =
+            // currProgress == "Complete" ? "secondQuiz" : currProgress;
 
             return res.status(200).send({
               status: "Success",

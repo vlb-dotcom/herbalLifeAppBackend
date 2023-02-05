@@ -18,7 +18,9 @@
     "express": "^4.18.1",
     "firebase-admin": "^10.0.2",
     "firebase-functions": "^4.0.2",
-    "moment": "^2.29.4"
+    "moment": "^2.29.4",
+    "moment-timezone": "^0.5.40",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^8.9.0",
