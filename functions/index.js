@@ -1442,13 +1442,15 @@ app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
 
       let batchData = await reqDoc.get();
       let batchDataRes = batchData.data();
-      let startDateData = batchDataRes.batchStartDate;
 
       if (batchDataRes == null || batchDataRes == undefined) {
+        console.log("Batch No Data Found!");
         batchDataRes = "No batch found!";
         quizComState = "NA";
       } else {
+        let startDateData = batchDataRes.batchStartDate;
         // GET QUIZ DATA BY QUIZ ID
+        console.log("Batch Data Res");
         console.log(batchDataRes);
 
         console.log("BATCH START DATE: " + startDateData);
@@ -1458,11 +1460,15 @@ app.get("/api/v1/uchat/getCurrentQuiz/:userID", async (req, res) => {
         let quizDays = [5, 10];
 
         let checkQuizChallengerState = "";
+        console.log("Current Quiz: ");
+        console.log(ch_CurrentQuiz);
         // VALIDATE IF FIRST QUIZ OR SECOND QUIZ
         if (ch_CurrentQuiz == "firstQuiz" || ch_CurrentQuiz == "firstDay") {
+          console.log("First Quiz...");
           checkQuizChallengerState = "1st";
           currQuiz = "firstQuiz";
         } else {
+          console.log("Second Quiz....");
           checkQuizChallengerState = "2nd";
           currQuiz = "secondQuiz";
         }
@@ -1697,7 +1703,7 @@ app.put(
       let newPoints = parseInt(resChData.groupPoints) + parseInt(userPoints);
       console.log("New Points: " + newPoints);
 
-      if (quizPhase == "firstQuiz") {
+      if (quizPhase == "firstQuiz" || quizPhase == "firstDay") {
         console.log("FIrst QUIZ");
         await reqDoc.update({
           currentQuizNum: parseInt(resChData.currentQuizNum) + 1,
@@ -1748,6 +1754,7 @@ app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
     let stateUpload;
     // console.log(challengerRes)
     if (challengerRes === null || challengerRes === undefined) {
+      console.log("Cannot Find Challenger.");
       response = "Cannot find challenger.";
       stateValue = false;
     } else {
@@ -1767,6 +1774,7 @@ app.get("/api/v1/uchat/getCurrentPhase/:userID", async (req, res) => {
       if (batchDataRes == null || batchDataRes == undefined) {
         batchDataRes = "No batch found!";
         quizComState = "NA";
+        console.log("No Batch Found.");
       } else {
         // GET QUIZ DATA BY QUIZ ID
 
