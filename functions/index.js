@@ -2249,6 +2249,48 @@ app.get("/api/v1/getLeaderBoard", async (req, res) => {
   }
 });
 
+// DELETE USER
+app.delete("/api/v1/delete/user/:uid", async (req, res) => {
+  try {
+    let userID = req.params.uid;
+    console.log("Deleting user...");
+
+    admin
+      .auth()
+      .deleteUser(userID)
+      .then(async () => {
+        console.log("Successfully deleted user: " + userID);
+
+        const reqDoc = db.collection("users").doc(userID);
+        await reqDoc.delete();
+
+        let batchData = await getAllBatchesWithAssignedCoach(userID);
+
+        for (let i = 0; i < batchData.length; i++) {
+          await updateBatchByIDCoachData(batchData[i]);
+        }
+
+        return res.status(200).send({
+          status: "Success",
+          msg: "Successfully deleted user: " + userID,
+        });
+      })
+      .catch((error) => {
+        // console.log("Error deleting user:", error);
+        return res.status(500).send({
+          status: "Failed",
+          msg: error,
+        });
+      });
+  } catch (err) {
+    // console.log(err);
+    return res.status(500).send({
+      status: "Failed",
+      msg: err,
+    });
+  }
+});
+
 // Get getMarathonJourneyStat
 app.get("/api/v1/getMarathonJourneyStat", async (req, res) => {
   try {
@@ -2381,6 +2423,80 @@ async function fetchAllChallengerData() {
       response.push(selectedItem);
     });
     return response;
+  });
+}
+
+async function getAllBatchesWithAssignedCoach(coachID) {
+  const reqDoc = db.collection("batches");
+
+  let response = [];
+
+  await reqDoc.get().then((data) => {
+    let docs = data.docs;
+
+    docs.map((doc) => {
+      const selectedItem = {
+        id: doc.data().id,
+        batchName: doc.data().batchName,
+        batchChallengeType: doc.data().batchChallengeType,
+        batchStatusState: doc.data().batchStatusState,
+        batchCreatedDate: doc.data().batchCreatedDate,
+        batchCreator: doc.data().batchCreator,
+        batchImageLink: doc.data().batchImageLink,
+        batchStartDate: doc.data().batchStartDate,
+        batchEndDate: doc.data().batchEndDate,
+        batchStartRunTime: doc.data().batchStartRunTime,
+        batchAssignedCoach: doc.data().batchAssignedCoach,
+        batchAssignedBatchVid: doc.data().batchAssignedBatchVid,
+        batchAssignedQuiz: doc.data().batchAssignedQuiz,
+        batchAssignedQuizB: doc.data().batchAssignedQuizB,
+        batchTotalChallengers: doc.data().batchTotalChallengers,
+        batchChallengers: doc.data().batchChallengers,
+      };
+
+      selectedItem.batchAssignedCoach == coachID
+        ? response.push(selectedItem)
+        : "";
+    });
+  });
+
+  // console.log(response);
+
+  return response;
+}
+
+async function updateBatchByIDCoachData(batchData) {
+  let batchID = batchData.id;
+  // Update batch by id
+  const reqDoc = db.collection("batches").doc(batchID);
+
+  let batchChallengerData = [];
+  for (let i = 0; i < batchData.batchChallengers.length; i++) {
+    let jsonStruc = {
+      challengerID: batchData.batchChallengers[i].challengerID,
+      rankPoints: batchData.batchChallengers[i].rankPoints,
+    };
+
+    batchChallengerData.push(jsonStruc);
+  }
+
+  await reqDoc.update({
+    id: batchData.id,
+    batchName: batchData.batchName,
+    batchChallengeType: batchData.batchChallengeType,
+    batchStatusState: batchData.batchStatusState,
+    batchCreatedDate: batchData.batchCreatedDate,
+    batchStartDate: batchData.batchStartDate,
+    batchEndDate: batchData.batchEndDate,
+    batchStartRunTime: batchData.batchStartRunTime,
+    batchCreator: batchData.batchCreator,
+    batchImageLink: batchData.batchImageLink,
+    batchAssignedCoach: "Waiting",
+    batchAssignedBatchVid: batchData.batchAssignedBatchVid,
+    batchAssignedQuiz: batchData.batchAssignedQuiz,
+    batchAssignedQuizB: batchData.batchAssignedQuizB,
+    batchTotalChallengers: batchData.batchTotalChallengers,
+    batchChallengers: batchChallengerData,
   });
 }
 
